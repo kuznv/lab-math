@@ -7,19 +7,15 @@ typealias Cell = BigDecimal
 typealias Row = MutableList<Cell>
 typealias MatrixList = MutableList<Row>
 
-class Matrix private constructor(matrix: MatrixList, needToCheckList: Boolean) : MatrixList by matrix {
+class Matrix private constructor(list: MatrixList, needToCheckList: Boolean) : MatrixList by list, Cloneable {
 
     init {
-        if (needToCheckList) matrix.checkRowsLengthsAreEqual()
+        if (needToCheckList) list.checkRowsLengthsAreEqual()
     }
 
-    constructor(matrix: MatrixList) : this(matrix, needToCheckList = true)
+    constructor(list: MatrixList) : this(list, needToCheckList = true)
 
-    constructor(
-            rows: Int,
-            columns: Int,
-            init: (row: Int, column: Int) -> Cell
-    ) : this(
+    constructor(rows: Int, columns: Int, init: (row: Int, column: Int) -> Cell) : this(
             MutableList(rows) { row ->
                 MutableList(columns) { column ->
                     init(row, column)
@@ -29,7 +25,10 @@ class Matrix private constructor(matrix: MatrixList, needToCheckList: Boolean) :
     )
 
     inline val rowsCount get() = size
+
     inline val columnsCount get() = firstOrNull()?.size ?: 0
+
+    public override fun clone() = Matrix(mapTo(ArrayList(rowsCount)) { row -> ArrayList(row) }, needToCheckList = false)
 
     override fun toString() = joinToString(
             prefix = "Matrix(${rowsCount}x$columnsCount) [\n",

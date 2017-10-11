@@ -2,62 +2,61 @@ package io
 
 import math.matrix.Cell
 import math.matrix.Matrix
-import math.matrix.Row
-import util.nextOrNull
+import java.math.BigDecimal
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import java.util.regex.Pattern
 
-fun randomMatrix(rows: Int,
-                 columns: Int,
-                 random: Random = ThreadLocalRandom.current()
+fun randomMatrix(
+        rows: Int,
+        columns: Int,
+        random: Random = ThreadLocalRandom.current()
 ) = Matrix(rows, columns) { _, _ ->
-    (random.nextDouble() * 1000).toBigDecimal()
+    BigDecimal(random.nextDouble() * 100000)
 }
 
 fun Input.readMatrix(rows: Int, columns: Int): Matrix {
-    val cellDelimiter = Pattern.compile("[ ,\t]++")
-    val inputStreamReader = inputStream.reader()
+//    val cellDelimiter = Pattern.compile("[ ,\t\n]++")
+    val cellPattern = Pattern.compile("([^ ,\t\n]+)[ ,\t]*+")
+    val scanner = Scanner(inputStream).useDelimiter("")
 
-    val lines = Scanner(inputStreamReader)
-            .useDelimiter("\n")
-            .asSequence()
-            .filter { it.isNotBlank() }
+    val currentLine = StringBuilder()
 
-    val scanner = Scanner(inputStreamReader).useDelimiter(cellDelimiter)
-    val matrixList = parseMatrix(lines, rows, columns, scanner).toMutableList()
+    return Matrix(rows, columns) { rowIndex, columnIndex ->
+        var cell: Cell?
+        var word: String
 
-    require(matrixList.size == rows) { "$rows rows expected, ${matrixList.size} found" }
-
-    return Matrix(matrixList)
-}
-
-private fun Input.parseMatrix(
-        lines: Sequence<String>,
-        rows: Int,
-        columns: Int,
-        inputScanner: Scanner
-): Sequence<Row> = lines.take(rows).mapIndexed { row, line ->
-    var scanner = Scanner(line)
-    MutableList<Cell>(columns) { column ->
-        var cell: Cell? = null
         do {
-            val word = scanner.nextOrNull()
-            if (word == null) {
-                onException("Reading matrix row #${row + 1}: $columns elements expected, $column found")
-                continue
+            while (!scanner.hasNext(cellPattern)) {
+                onException("Reading matrix row #${rowIndex + 1}: $columns elements expected, $columnIndex found\n$currentLine")
             }
 
+            scanner.next(cellPattern)
+            word = scanner.match().group(1)
             cell = word.toBigDecimalOrNull()
+
             if (cell == null) {
+                val errorOffset = currentLine.length + 1
+                val errorLine = "$currentLine $word"
+
                 onException(ParseException.getMessage(
-                        "Error reading matrix cell [${row + 1}, ${column + 1}]",
-                        line,
-                        errorOffset = line.indexOf(word)
+                        "Error reading matrix cell [${rowIndex + 1}, ${columnIndex + 1}]",
+                        errorLine,
+                        errorOffset
                 ))
-                scanner = inputScanner
             }
         } while (cell == null)
+
+        if (columnIndex == columns - 1) {
+            currentLine.setLength(0)
+
+            if (rowIndex != rows - 1) {
+                scanner.nextLine()
+            }
+        } else {
+            currentLine.append(word).append(' ')
+        }
+
         cell
     }
 }

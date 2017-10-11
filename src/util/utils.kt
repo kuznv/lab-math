@@ -4,16 +4,11 @@ import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
 import java.text.DecimalFormat
-import java.util.*
-
-operator fun Char.times(times: Int) = CharArray(times) { this }
-
-fun Scanner.nextOrNull() = if (hasNext()) next() else null
 
 val decimalFormat = DecimalFormat().apply {
     maximumFractionDigits = 2
     minimumFractionDigits = 2
-    minimumIntegerDigits = 4
+//    minimumIntegerDigits = 4
     isGroupingUsed = false
     positivePrefix = " "
 }
@@ -21,12 +16,9 @@ val decimalFormat = DecimalFormat().apply {
 val mathContext = MathContext(100, RoundingMode.HALF_UP)
 
 inline fun <T> Iterable<T>.sumByBigDecimal(select: (T) -> BigDecimal): BigDecimal =
-        fold(BigDecimal.ZERO) { sum, next ->
-            sum + select(next)
-        }
+        fold(BigDecimal.ZERO) { sum, next -> sum + select(next) }
 
-val Int.isOdd: Boolean
-    get() = rem(2) == 0
+val Int.isOdd: Boolean get() = rem(2) == 0
 
 fun <E> MutableList<E>.swapElements(i: Int, j: Int) {
     val temp = this[i]

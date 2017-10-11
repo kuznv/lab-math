@@ -6,10 +6,10 @@ import util.swapElements
 import java.math.BigDecimal
 import kotlin.math.min
 
-fun Matrix.triangle() {
+fun Matrix.toTriangular() {
     val steps = min(rowsCount, columnsCount - 1)
     for (i in 0 until steps) {
-        val primaryRowIndex = (i..lastIndex).maxBy { row -> this[row][i].abs() }!!
+        val primaryRowIndex = (i..lastIndex).maxBy { rowIndex -> this[rowIndex][i].abs() }!!
 
         swapElements(i, primaryRowIndex)
 
@@ -17,12 +17,12 @@ fun Matrix.triangle() {
 
         if (primaryElement == BigDecimal.ZERO) continue
 
-        for (row in i + 1 until rowsCount) {
-            val cell = this[row][i]
+        for (rowIndex in i + 1 until rowsCount) {
+            val cell = this[rowIndex][i]
             val k = cell.divide(primaryElement, mathContext)
 
-            for (column in i until columnsCount) {
-                this[row][column] -= k * this[i][column]
+            for (columnIndex in i until columnsCount) {
+                this[rowIndex][columnIndex] -= k * this[i][columnIndex]
             }
         }
     }
