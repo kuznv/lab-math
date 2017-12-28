@@ -8,7 +8,7 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.coroutines.experimental.buildSequence
 
-const val FRACTION_DIGITS = 15
+const val FRACTION_DIGITS = 3
 
 val decimalFormat = DecimalFormat().apply {
     minimumFractionDigits = FRACTION_DIGITS
@@ -38,19 +38,29 @@ fun <T> Sequence<T>.dropAfter(predicate: (T) -> Boolean): Sequence<T> = buildSeq
 fun Iterable<BigDecimal>.sum() = fold(BigDecimal.ZERO, BigDecimal::plus)
 fun Sequence<BigDecimal>.sum() = fold(BigDecimal.ZERO, BigDecimal::plus)
 
-fun <E> MutableList<E>.swapElements(i: Int, j: Int) {
-    val temp = this[i]
-    this[i] = this[j]
-    this[j] = temp
+fun <E> MutableList<E>.swap(index1: Int, index2: Int) {
+    val temp = this[index1]
+    this[index1] = this[index2]
+    this[index2] = temp
 }
+
+fun IntRange.toDoubleRange(): ClosedFloatingPointRange<Double> = start.toDouble()..endInclusive.toDouble()
+fun ClosedFloatingPointRange<Double>.toIntRange() = start.toInt()..endInclusive.toInt()
 
 val BigDecimal.isZero get() = signum() == 0
 
-fun Row.makeString() = joinToString(separator = "\t", transform = Cell::makeString)
-fun Cell.makeString() = decimalFormat.format(this)!!
+fun Double.format() = decimalFormat.format(this)!!
+fun Cell.format() = decimalFormat.format(this)!!
+fun Row.format() = joinToString(separator = "\t", transform = Cell::format)
 
 fun CharSequence?.orEmpty() = this ?: ""
 
-inline fun <A, B, C> ((A) -> B).compose(crossinline f: (B) -> C): (A) -> C = { a -> f(this(a)) }
+typealias DoubleRange = ClosedFloatingPointRange<Double>
 
-fun <T> T?.ifNull(action: () -> Unit) = apply { if (this == null) action() }
+fun <T> Sequence<T>.loop(): Sequence<T> = buildSequence {
+    while (true) {
+        val iterator = iterator()
+        if (!iterator.hasNext()) break
+        yieldAll(iterator)
+    }
+}

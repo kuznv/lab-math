@@ -1,50 +1,46 @@
 import io.*
-import math.matrix.ExtendedMatrix
-import math.matrix.Matrix
-import math.matrix.TriangularMatrix
-import util.decimalFormat
+import math.matrix.*
 import util.isZero
+import util.format
 import java.io.File
 import java.math.BigDecimal
 import java.util.*
 
 fun main(args: Array<String>) {
-    val rows = UserInput.read("Введите количество строк в матрице") { it.toIntOrNull()?.takeIf { it > 0 } }
-    val columns = rows + 1
+    val rowsCount = UserInput.read("Введите количество строк в матрице") { it.toIntOrNull()?.takeIf { it > 0 } }
+    val columnsCount = rowsCount + 1
 
-    var matrix: Matrix = ExtendedMatrix(UserInput.select(
-            "Из файла" to {
-                val file = File("resources/test.txt")
-                StreamInput(file.inputStream()).use { it.readMatrix(rows, columns) }
-            },
-            "Из консоли" to {
-                println("Ввод матрицы ${rows}x$columns")
-                UserInput.readMatrix(rows, columns)
-            },
-            "Случайные коэффициенты" to {
-                randomMatrix(rows, columns, random = Random(0))
-            }
-    ))
+    val matrix: Matrix = UserInput.select {
+        "Из файла" {
+            val file = File("resources/test.txt")
+            Input(file.inputStream()).use { it.readMatrix(rowsCount, columnsCount) }
+        }
+        "Из консоли" {
+            println("Ввод матрицы ${rowsCount}x$columnsCount")
+            UserInput.readMatrix(rowsCount, columnsCount)
+        }
+        "Случайные коэффициенты" {
+            randomMatrix(rowsCount, columnsCount, random = Random(0))
+        }
+    }
 
-    println("Исходная матрица: " + matrix)
+    println("Исходная матрица: $matrix")
 
-    matrix = TriangularMatrix(matrix)
-    println("Треугольная матрица: " + matrix)
+    val triangularMatrix = matrix.toTriangularMatrix()
+    println("Треугольная матрица: $triangularMatrix")
 
-    val determinant = matrix.determinant
-    println("Определитель = " + decimalFormat.format(determinant))
+    val determinant = triangularMatrix.determinant
+    println("Определитель = ${determinant.format()}")
 
     if (determinant.isZero) {
         println("Метод не применим")
         return
     }
 
-    matrix = ExtendedMatrix(matrix)
+    val solution = triangularMatrix.solve()
+    println("Решение: ${solution.format()}")
 
-    val solution = matrix.solve()
-    println("Решение: " + solution.joinToString(transform = decimalFormat::format))
-
-    val discrepancy = matrix.discrepancy(solution)
-    println("Невязки: " + discrepancy.joinToString(transform = decimalFormat::format))
-    println("Максимальное отклонение: " + discrepancy.maxBy(BigDecimal::abs).let(decimalFormat::format))
+    val discrepancy = triangularMatrix.getDiscrepancy(solution)
+    println("Невязки: ${discrepancy.format()}")
+    println("Максимальное погрешность: ${discrepancy.maxBy(BigDecimal::abs)?.format()}")
 }

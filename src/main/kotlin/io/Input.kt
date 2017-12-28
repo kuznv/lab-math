@@ -1,18 +1,13 @@
 package io
 
 import java.io.InputStream
+import java.text.ParseException
 
-interface Input {
-    val inputStream: InputStream
-
-    fun <T> parse(message: String, parse: Input.() -> T): T = parse()
+open class Input(val inputStream: InputStream) : AutoCloseable by inputStream {
+    open fun <T> parse(message: String, parse: Input.() -> T): T = parse()
 }
 
-class StreamInput(override val inputStream: InputStream) : Input, AutoCloseable by inputStream
-
-object UserInput : Input {
-    override val inputStream: InputStream = System.`in`
-
+object UserInput : Input(System.`in`) {
     override fun <T> parse(message: String, parse: Input.() -> T): T {
         while (true) {
             print(message)

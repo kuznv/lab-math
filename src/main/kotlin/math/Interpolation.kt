@@ -2,12 +2,20 @@ package math
 
 data class Point(val x: Double, val y: Double)
 
-fun interpolate(vararg points: Point): (Double) -> Double = { x ->
-    fun basisPolynomial(i: Int, xI: Double): Double =
-            points
-                    .filterIndexed { j, _ -> j != i }
-                    .map { (xJ) -> (x - xJ) / (xI - xJ) }
-                    .reduce(Double::times)
+fun interpolate(points: List<Point>): (Double) -> Double {
+    val dividers = points.mapIndexed { i, (xI) ->
+        (points - points[i])
+                .map { (xJ) -> xI - xJ }
+                .reduce(Double::times)
+    }
 
-    points.mapIndexed { i, (xI, yI) -> yI * basisPolynomial(i, xI) }.sum()
+    return { x ->
+        fun basisPolynomial(i: Int): Double =
+                (points - points[i])
+                        .map { (xJ) -> (x - xJ) }
+                        .reduce(Double::times)
+                        .div(dividers[i])
+
+        points.mapIndexed { i, (_, yI) -> yI * basisPolynomial(i) }.sum()
+    }
 }

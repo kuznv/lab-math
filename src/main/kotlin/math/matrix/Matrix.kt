@@ -1,17 +1,17 @@
 package math.matrix
 
-import util.*
+import util.format
 import java.math.BigDecimal
 import kotlin.math.min
 
 typealias Cell = BigDecimal
-typealias Row = MutableList<Cell>
-typealias MatrixList = MutableList<Row>
+typealias Row = List<Cell>
+typealias MatrixList = List<Row>
 
-open class Matrix(private val matrixList: MatrixList) : MatrixList by matrixList {
+class Matrix(matrixList: MatrixList) : MatrixList by matrixList {
     constructor(rows: Int, columns: Int, init: (row: Int, column: Int) -> Cell) : this(
-            MutableList(rows) { row ->
-                MutableList(columns) { column ->
+            List(rows) { row ->
+                List(columns) { column ->
                     init(row, column)
                 }
             }
@@ -21,18 +21,12 @@ open class Matrix(private val matrixList: MatrixList) : MatrixList by matrixList
 
     val columnsCount = firstOrNull()?.size ?: 0
 
-    open val smallestSide = min(rowsCount, columnsCount)
-
-    val diagonal get() = List(smallestSide) { i -> this[i][i] }
+    val diagonal get() = List(min(rowsCount, columnsCount)) { i -> this[i][i] }
 
     override fun toString() = joinToString(
             prefix = "Matrix(${rowsCount}x$columnsCount) [\n",
             separator = "\n",
             postfix = "\n]",
-            transform = Row::makeString
+            transform = Row::format
     )
-
-    override fun equals(other: Any?) = matrixList == other
-
-    override fun hashCode() = matrixList.hashCode()
 }
