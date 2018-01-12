@@ -63,7 +63,7 @@ private fun selectFunctionAndPoints(): Pair<(Double) -> Double, List<Point>> = U
         ).map { x -> Point(x, cos(x)) }
     }
 
-    val list2 = listOf(
+    val points2 = listOf(
             0.0,
             PI / 8,
             PI / 7,
@@ -76,10 +76,12 @@ private fun selectFunctionAndPoints(): Pair<(Double) -> Double, List<Point>> = U
     ).map { x -> Point(x, sin(x)) }
 
     "sin, 9 точек на интервале 0 по 2Пи" {
-        ::sin to list2
+        ::sin to points2
     }
     "sin, точки с предыдущего примера с 1 измененной точкой" {
-        ::sin to list2.toMutableList().also { it[3] = it[3].copy(y = 1.1) }
+        ::sin to points2.toMutableList().also {
+            it[3] = it[3].copy(y = 1.1)
+        }
     }
     "sin, 9 точек на интервале 0 по 50Пи" {
         val max = PI * 50
